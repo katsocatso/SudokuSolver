@@ -21,6 +21,30 @@ def printMatrix(matrix):
             print(c, end=" ")
         print()
 
+###############################################################################################
+'''
+Validity checks 
+'''
+# Checks if val is in box boxIdx
+def valInBox(boxIdx, val, matrix):
+    box = []
+    shift = boxIdx % 3
+    for r in range(3):
+        for c in range(3):
+            box.append(matrix[r + boxIdx - shift][c + shift * 3])
+    return val in box
+
+# Checks if val is in col colIdx
+def valInCol(colIdx, val, matrix):
+    for row in matrix:
+        if val == row[colIdx]:
+            return True
+    return False
+
+# Checks if val is in row rowIdx
+def valInRow(rowIdx, val, matrix):
+    return val in matrix[rowIdx]
+
 # Returns the box number for [row, col]
 # Note: boxes are numbered left to right, top to bottom
 # like so:
@@ -222,7 +246,7 @@ def tryAssign(matrix):
     return False
 
 
-def versionB():
+def versionC():
     global allPossibleValues
     global blanks
     matrix = []
@@ -241,7 +265,7 @@ Main program
 '''
 
 startTime = time.time()
-versionB()
+versionC()
 endTime = time.time()
 executionTime = endTime - startTime
 print("Execution Time:", executionTime)
