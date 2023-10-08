@@ -200,9 +200,92 @@ def forwardCheck(currRow, currCol, val, allPossibleValues):
                 return True
     return False
 ############################################################################################
+'''
+Heuristic related functions
+'''
 
-# Modifies the global var nodesExpanded
-# Returns true if the Sudoku puzzle is solvable, false otherwise
+# Returns a dictionary where keys are the value in the domain and the value is the 
+#   number of constraints on that value
+def countConstraintsOnValues(cellKey, allPossibleValues, possibleValuesForCell):
+    row = int(cellKey[0])
+    col = int(cellKey[1])
+    
+    constraintsOnValues = {}
+    for value in possibleValuesForCell:
+        constraintsOnValues[str(value)] = 0
+    
+    for value in constraintsOnValues:
+        # Count constraints in row
+        for c in range(9):
+            if c == col:
+                continue
+            key = str(row) + str(c)
+            if key in allPossibleValues and value in allPossibleValues[key]:
+                constraintsOnValues[value] += 1
+        
+        # Count constraints in col
+        for r in range(9):
+            if r == row:
+                continue
+            key = str(row) + str(c)
+            if key in allPossibleValues and value in allPossibleValues[key]:
+                constraintsOnValues[value] += 1
+        
+        # Count constraints in box
+        boxIdx = getBox(row, col)
+        shift = boxIdx % 3
+        for r in range(3):
+            for c in range(3):
+                key = str(r + boxIdx - shift) + str(c + shift * 3)
+                if key in allPossibleValues and value in allPossibleValues[key]:
+                    constraintsOnValues[value] += 1
+    return constraintsOnValues
+        
+
+# Count the number of cells constrainted by the cell at key
+def countConstraints(key, blanks):
+    row = int(key[0])
+    col = int(key[1])
+    
+    numConstraints = 0
+    # Count constraints in row
+    for c in range(9):
+        if c == col:
+            continue
+        if str(row) + str(c) in blanks:
+            numConstraints += 1
+    
+    # Count constraints in col
+    for r in range(9):
+        if r == row:
+            continue
+        if str(r) + str(col) in blanks:
+            numConstraints += 1
+            
+    # Count constraints in box
+    boxIdx = getBox(row, col)
+    shift = boxIdx % 3
+    for r in range(3):
+        for c in range(3):
+            key = str(r + boxIdx - shift) + str(c + shift * 3)
+            if key in blanks:
+                numConstraints += 1
+    return numConstraints
+
+# Returns the most constraining variable out of key1, key2
+def mostConstraining(key1, key2, blanks):
+    key1Constraints = countConstraints(key1, blanks)
+    key2Constraints = countConstraints(key2, blanks)
+    return key1 if key1Constraints > key2Constraints else key2
+
+############################################################################################
+'''
+- Modifies the global var nodesExpanded
+- Returns true if the Sudoku puzzle is solvable, false otherwise
+- Uses the minimum remaining values heuristic to select variables
+- Uses the most constraining variable heuristic to break ties among MRV
+- Uses the least constraining value to select values
+'''
 def tryAssign(matrix):
     global nodesExpanded
 
@@ -214,16 +297,37 @@ def tryAssign(matrix):
         print("Total Nodes expanded: ", nodesExpanded)
         return True
 
-    # Get random blank cell
-    nextBlank = findRandBlank(blanks)
-    row = nextBlank[0]
-    col = nextBlank[1]
-    rckey = str(row) + str(col)
-
     allPossibleValues = initializeAllPossibleValues(matrix, blanks)
-    possibleValuesForCell = allPossibleValues[rckey]
+    
+    mrv = 9
+    mrvKey = ""
+    # get min of allPossibleValues for MRV heuristic
+    for key in allPossibleValues:
+        if len(allPossibleValues[key]) < mrv:
+            mrv = len(allPossibleValues[key])
+            mrvKey = key
+        elif len(allPossibleValues[key]) == mrv:
+            # break ties by most constraning variable
+            mrvKey = mostConstraining(mrvKey, key, blanks)
+    
+    possibleValuesForCell = allPossibleValues[mrvKey]
+    row = int(mrvKey[0])
+    col = int(mrvKey[1])
 
-    # Pick random value and assign it to the chosen blank cell until there are no possible values left
+    # # Pick least constraining value until there are no possible values left, break ties randomly
+    # while possibleValuesForCell:
+    #     constraintsOnValues = countConstraintsOnValues(mrvKey, allPossibleValues, possibleValuesForCell)
+    #     lcv = min(constraintsOnValues, key=constraintsOnValues.get)
+
+    #     possibleValuesForCell.remove(int(lcv))
+
+    #     matrix[row][col] = lcv
+    #     nodesExpanded += 1
+    #     print(nodesExpanded)        # Can comment this out for no continous output
+
+    #     validAssignment = forwardCheck(
+    #         row, col, lcv, allPossibleValues)
+     # Pick random value and assign it to the chosen blank cell until there are no possible values left
     while possibleValuesForCell:
         val = findRandomVal(possibleValuesForCell)
         possibleValuesForCell.remove(val)

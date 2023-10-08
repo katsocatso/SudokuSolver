@@ -7,17 +7,17 @@ The answers to these puzzles are contained in <difficulty>-answer.txt where diff
 
 ## Version A
 To run Version A, use the following command:
-```python sudokuA.py < <input.txt>```
+```python sudokuA.py < ./input/<input.txt>```
 where <input.txt> is your input file.
 
 ## Version B
 To run Version B, use the following command:
-```python sudokuB.py < <input.txt>```
+```python sudokuB.py < ./input/<input.txt>```
 where <input.txt> is your input file.
 
 ## Version C
 To run Version C, use the following command:
-```python sudokuC.py < <input.txt>``` 
+```python sudokuC.py < ./input/<input.txt>``` 
 where <input.txt> is your input file.
 
 ## Good to Knows
