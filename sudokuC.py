@@ -315,29 +315,18 @@ def tryAssign(matrix):
     col = int(mrvKey[1])
 
     # # Pick least constraining value until there are no possible values left, break ties randomly
-    # while possibleValuesForCell:
-    #     constraintsOnValues = countConstraintsOnValues(mrvKey, allPossibleValues, possibleValuesForCell)
-    #     lcv = min(constraintsOnValues, key=constraintsOnValues.get)
-
-    #     possibleValuesForCell.remove(int(lcv))
-
-    #     matrix[row][col] = lcv
-    #     nodesExpanded += 1
-    #     print(nodesExpanded)        # Can comment this out for no continous output
-
-    #     validAssignment = forwardCheck(
-    #         row, col, lcv, allPossibleValues)
-     # Pick random value and assign it to the chosen blank cell until there are no possible values left
     while possibleValuesForCell:
-        val = findRandomVal(possibleValuesForCell)
-        possibleValuesForCell.remove(val)
+        constraintsOnValues = countConstraintsOnValues(mrvKey, allPossibleValues, possibleValuesForCell)
+        lcv = int(min(constraintsOnValues, key=constraintsOnValues.get))
 
-        matrix[row][col] = val
+        possibleValuesForCell.remove(lcv)
+
+        matrix[row][col] = lcv
         nodesExpanded += 1
         print(nodesExpanded)        # Can comment this out for no continous output
 
         validAssignment = forwardCheck(
-            row, col, val, allPossibleValues)
+            row, col, lcv, allPossibleValues)
         # if there are no values left for a particular cell
         if not validAssignment:
             matrix[row][col] = 0
